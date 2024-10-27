@@ -43,8 +43,8 @@ jobs:
     runs-on: ubuntu-latest
     # needs: build
     steps:
-    - name: test loc of current directory
-      run: ls -la
+    - name: Checkout code
+      uses: actions/checkout@v4
     - name: Replace secrets in Docker compose file
       env:
         POSTGRES_URL: ${{ secrets.POSTGRES_URL }}
