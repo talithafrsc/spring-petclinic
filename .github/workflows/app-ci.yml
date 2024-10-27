@@ -18,11 +18,12 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-    - name: Set up Google Cloud SDK
-      uses: google-github-actions/setup-gcloud@v2
+    - name: Authenticate to GCP
+      uses: google-github-actions/auth@v2
       with:
-        project_id: ${{ secrets.GCP_PROJECT_ID }}
-        service_account_key: ${{ secrets.GCP_JSON }}
+        credentials_json: ${{ secrets.GCP_JSON }}
+    - name: Set up Google Cloud CLI
+      uses: google-github-actions/setup-gcloud@v2
     - name: Configure Docker
       run: gcloud auth configure-docker asia-docker.pkg.dev --quiet
     - name: Build Docker Image
@@ -31,8 +32,8 @@ jobs:
         docker tag asia-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/petclinic/petclinic:${{ vars.APP_TAG }} asia-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/petclinic/petclinic:latest
     - name: Push Image to Google Artifact Registry
       run: |
-        docker push gcr.io/${{ secrets.GCP_PROJECT_ID }}/petclinic-app:${{ vars.APP_TAG }}
-        docker push gcr.io/${{ secrets.GCP_PROJECT_ID }}/petclinic-app:latest
+        docker push asia-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/petclinic/petclinic:${{ vars.APP_TAG }}
+        docker push asia-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/petclinic/petclinic:latest
 
   deploy:
     defaults:
