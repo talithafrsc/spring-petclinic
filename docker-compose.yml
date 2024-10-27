@@ -1,25 +1,37 @@
+networks:
+  app-network:
+    driver: bridge
+
 services:
-  mysql:
-    image: mysql:9.0
-    ports:
-      - "3306:3306"
+  petclinic-app:
+    image: asia-docker.pkg.dev/spring-petclinic-439415/petclinic/petclinic:%APP_TAG%
+    labels:
+      service: petclinic
+    logging:
+      driver: gcplogs
+      options:
+        labels: "service"
     environment:
-      - MYSQL_ROOT_PASSWORD=
-      - MYSQL_ALLOW_EMPTY_PASSWORD=true
-      - MYSQL_USER=petclinic
-      - MYSQL_PASSWORD=petclinic
-      - MYSQL_DATABASE=petclinic
+      - POSTGRES_URL=%POSTGRES_URL%
+      - POSTGRES_USER=%POSTGRES_USER%
+      - POSTGRES_PASSWORD=%POSTGRES_PASSWORD%
+      - POSTGRES_DB=%POSTGRES_DB%
+    networks:
+      app-network:
+        aliases:
+          - petclinic-app
+  nginx:
+    container_name: nginx
+    image: nginx:1.27.2-perl
+    ports:
+      - "80:80"
     volumes:
-      - "./conf.d:/etc/mysql/conf.d:ro"
-    profiles:
-      - mysql
-  postgres:
-    image: postgres:17.0
-    ports:
-      - "5432:5432"
-    environment:
-      - POSTGRES_PASSWORD=petclinic
-      - POSTGRES_USER=petclinic
-      - POSTGRES_DB=petclinic
-    profiles:
-      - postgres
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    labels:
+      service: nginx
+    logging:
+      driver: gcplogs
+      options:
+        labels: "service"
+    networks:
+      app-network:

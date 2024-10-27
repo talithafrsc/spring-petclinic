@@ -107,7 +107,7 @@ resource "google_compute_router_nat" "nat" {
 
 resource "google_artifact_registry_repository" "petclinic_repo" {
   location      = "asia"
-  repository_id = "petclinic"
+  repository_id = var.app
   description   = "Repository of petclinic app"
   format        = "DOCKER"
 }
