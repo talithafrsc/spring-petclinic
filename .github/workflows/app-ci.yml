@@ -77,6 +77,7 @@ jobs:
         chmod 600 ~/.ssh/iap_github_action ~/.ssh/iap_github_action.pub
     - name: Copy docker compose & NGINX files to VM 
       run: |
+        chmod +x deploy.sh
         gcloud compute scp \
           --tunnel-through-iap \
           --ssh-key-file ~/.ssh/iap_github_action \
