@@ -37,11 +37,11 @@ jobs:
       run: gcloud auth configure-docker asia-docker.pkg.dev --quiet
     - name: Build Docker Image
       run: |
-        docker build -t asia-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/petclinic/petclinic:${{ needs.release.outputs.new_release_version }} .
-        docker tag asia-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/petclinic/petclinic:${{ needs.release.outputs.new_release_version }} asia-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/petclinic/petclinic:latest
+        docker build -t asia-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/petclinic/petclinic:${{ needs.semver.outputs.new_release_version }} .
+        docker tag asia-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/petclinic/petclinic:${{ needs.semver.outputs.new_release_version }} asia-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/petclinic/petclinic:latest
     - name: Push Image to Google Artifact Registry
       run: |
-        docker push asia-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/petclinic/petclinic:${{ needs.release.outputs.new_release_version }}
+        docker push asia-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/petclinic/petclinic:${{ needs.semver.outputs.new_release_version }}
         docker push asia-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/petclinic/petclinic:latest
 
   deploy:
@@ -60,7 +60,7 @@ jobs:
         POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
         POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
         POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
-        APP_TAG: ${{ needs.release.outputs.new_release_version }}
+        APP_TAG: ${{ needs.semver.outputs.new_release_version }}
       run: |
         sed -i "s|%POSTGRES_URL%|$POSTGRES_URL|g" docker-compose.yml
         sed -i "s|%POSTGRES_USER%|$POSTGRES_USER|g" docker-compose.yml
