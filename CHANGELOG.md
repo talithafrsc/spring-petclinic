@@ -1,3 +1,10 @@
+## [1.0.12](https://github.com/talithafrsc/spring-petclinic/compare/v1.0.11...v1.0.12) (2024-10-27)
+
+
+### Bug Fixes
+
+* add auth to registry ([6f5c85e](https://github.com/talithafrsc/spring-petclinic/commit/6f5c85e1a83739ea45849fdd786087adf5c281a4))
+
 ## [1.0.11](https://github.com/talithafrsc/spring-petclinic/compare/v1.0.10...v1.0.11) (2024-10-27)
 
 
