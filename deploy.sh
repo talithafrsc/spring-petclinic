@@ -4,6 +4,9 @@ reload_nginx() {
     docker exec nginx /usr/sbin/nginx -s reload
 }
 
+# Authenticate to registry
+gcloud auth configure-docker asia-docker.pkg.dev --quiet
+
 # Ensure current containers are running
 docker compose up -d
 
