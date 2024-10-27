@@ -1,3 +1,10 @@
+## [1.0.5](https://github.com/talithafrsc/spring-petclinic/compare/v1.0.4...v1.0.5) (2024-10-27)
+
+
+### Bug Fixes
+
+* inspect tagging ([80e2d3e](https://github.com/talithafrsc/spring-petclinic/commit/80e2d3e6408b3fd5d21f1a81cd9039ed09f8ce2e))
+
 ## [1.0.4](https://github.com/talithafrsc/spring-petclinic/compare/v1.0.3...v1.0.4) (2024-10-27)
 
 
