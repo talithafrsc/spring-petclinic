@@ -1,3 +1,10 @@
+## [1.0.1](https://github.com/talithafrsc/spring-petclinic/compare/v1.0.0...v1.0.1) (2024-10-27)
+
+
+### Bug Fixes
+
+* tag extracting ([e681798](https://github.com/talithafrsc/spring-petclinic/commit/e681798709bbf963a0fe2855ab0144cccc13c032))
+
 # 1.0.0 (2024-10-27)
 
 
