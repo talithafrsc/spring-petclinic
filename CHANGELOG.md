@@ -1,3 +1,11 @@
+## [1.0.7](https://github.com/talithafrsc/spring-petclinic/compare/v1.0.6...v1.0.7) (2024-10-27)
+
+
+### Bug Fixes
+
+* variable naming ([1ba1977](https://github.com/talithafrsc/spring-petclinic/commit/1ba1977a76d1d2bda6d27aa2ae129f1de0503bb2))
+* variable naming ([93edfd2](https://github.com/talithafrsc/spring-petclinic/commit/93edfd20f2342314e0c3a99f4ae27a78d0d2c473))
+
 ## [1.0.6](https://github.com/talithafrsc/spring-petclinic/compare/v1.0.5...v1.0.6) (2024-10-27)
 
 
