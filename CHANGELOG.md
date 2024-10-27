@@ -1,3 +1,10 @@
+## [1.0.6](https://github.com/talithafrsc/spring-petclinic/compare/v1.0.5...v1.0.6) (2024-10-27)
+
+
+### Bug Fixes
+
+* tag variable ([ce82ead](https://github.com/talithafrsc/spring-petclinic/commit/ce82ead2ff163de74ebe2464d45886e1fb45390c))
+
 ## [1.0.5](https://github.com/talithafrsc/spring-petclinic/compare/v1.0.4...v1.0.5) (2024-10-27)
 
 
