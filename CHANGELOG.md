@@ -1,3 +1,10 @@
+## [1.0.10](https://github.com/talithafrsc/spring-petclinic/compare/v1.0.9...v1.0.10) (2024-10-27)
+
+
+### Bug Fixes
+
+* remove sudo ([e398e81](https://github.com/talithafrsc/spring-petclinic/commit/e398e814744953a4f93379fc9c690c52e3d498b1))
+
 ## [1.0.9](https://github.com/talithafrsc/spring-petclinic/compare/v1.0.8...v1.0.9) (2024-10-27)
 
 
