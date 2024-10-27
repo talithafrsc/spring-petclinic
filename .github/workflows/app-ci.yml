@@ -77,16 +77,22 @@ jobs:
         chmod 600 ~/.ssh/iap_github_action ~/.ssh/iap_github_action.pub
     - name: Copy docker compose & NGINX files to VM 
       run: |
-        chmod +x deploy.sh
         gcloud compute scp \
           --tunnel-through-iap \
           --ssh-key-file ~/.ssh/iap_github_action \
           --zone ${{ vars.GCP_ZONE }} \
           docker-compose.yml deploy.sh nginx.conf ${{ vars.GCP_INSTANCE_NAME }}:~/
+    - name: Inspect permissions
+      run: |
+        gcloud compute ssh ${{ vars.GCP_INSTANCE_NAME }} \
+          --tunnel-through-iap \
+          --ssh-key-file ~/.ssh/iap_github_action \
+          --zone ${{ vars.GCP_ZONE }} \
+          --command "ls -la"
     - name: Run deployment script
       run: |
         gcloud compute ssh ${{ vars.GCP_INSTANCE_NAME }} \
           --tunnel-through-iap \
           --ssh-key-file ~/.ssh/iap_github_action \
           --zone ${{ vars.GCP_ZONE }} \
-          --command "./deploy.sh"
+          --command "sudo ./deploy.sh"
