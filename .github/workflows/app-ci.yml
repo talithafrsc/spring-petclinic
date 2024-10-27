@@ -82,10 +82,10 @@ jobs:
           --ssh-key-file ~/.ssh/iap_github_action \
           --zone ${{ vars.GCP_ZONE }} \
           docker-compose.yml deploy.sh nginx.conf ${{ vars.GCP_INSTANCE_NAME }}:~/
-    - name: Add permission to deploy script
+    - name: Run deployment script
       run: |
         gcloud compute ssh ${{ vars.GCP_INSTANCE_NAME }} \
           --tunnel-through-iap \
           --ssh-key-file ~/.ssh/iap_github_action \
           --zone ${{ vars.GCP_ZONE }} \
-          --command "chmod +x ~/deploy.sh && bash ~/deploy.ssh"
+          --command "chmod +x ~/deploy.sh && bash ~/deploy.sh"
