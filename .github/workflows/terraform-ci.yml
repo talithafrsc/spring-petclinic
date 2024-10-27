@@ -7,6 +7,8 @@ on:
       - 'terraform/**'
       - .github/workflows/terraform-ci.yml
   pull_request:
+    branches:
+      - master
     types: 
       - closed
     paths:
@@ -40,7 +42,7 @@ jobs:
           
   terraform-deploy:
     runs-on: ubuntu-latest
-    if: github.event.pull_request.base.ref == 'master'
+    if: github.event.pull_request.merge == true
     defaults:
       run:
         shell: bash
