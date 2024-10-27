@@ -88,4 +88,4 @@ jobs:
           --tunnel-through-iap \
           --ssh-key-file ~/.ssh/iap_github_action \
           --zone ${{ vars.GCP_ZONE }} \
-          --command "chmod +x ~/deploy.sh && ~/deploy.ssh"
+          --command "chmod +x ~/deploy.sh && bash ~/deploy.ssh"
