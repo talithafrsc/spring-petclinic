@@ -19,7 +19,7 @@ NEW_CONTAINER=$(docker ps --latest --format "{{.Names}}")
 
 # Check liveness of new container
 while true; do
-    if docker exec $NEW_CONTAINER curl --silent --fail http://localhost:8080; then
+    if docker exec $NEW_CONTAINER curl -I --silent --fail http://localhost:8080; then
         echo "Service is running!"
         break
     else

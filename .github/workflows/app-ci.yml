@@ -4,36 +4,50 @@ on:
   push:
     branches:
       - master
-      - dev
-    paths-ignore:
-      - 'terraform/**'
       
 jobs:
-  # build:
-  #   runs-on: ubuntu-latest
-  #   defaults:
-  #     run:
-  #       shell: bash
-  #       working-directory: .
-  #   steps:
-  #   - name: Checkout code
-  #     uses: actions/checkout@v4
-  #   - name: Authenticate to GCP
-  #     uses: google-github-actions/auth@v2
-  #     with:
-  #       credentials_json: ${{ secrets.GCP_JSON }}
-  #   - name: Set up Google Cloud CLI
-  #     uses: google-github-actions/setup-gcloud@v2
-  #   - name: Configure Docker
-  #     run: gcloud auth configure-docker asia-docker.pkg.dev --quiet
-  #   - name: Build Docker Image
-  #     run: |
-  #       docker build -t asia-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/petclinic/petclinic:${{ vars.APP_TAG }} .
-  #       docker tag asia-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/petclinic/petclinic:${{ vars.APP_TAG }} asia-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/petclinic/petclinic:latest
-  #   - name: Push Image to Google Artifact Registry
-  #     run: |
-  #       docker push asia-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/petclinic/petclinic:${{ vars.APP_TAG }}
-  #       docker push asia-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/petclinic/petclinic:latest
+  semver:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Semantic Release
+        uses: cycjimmy/semantic-release-action@v4
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+  build:
+    runs-on: ubuntu-latest
+    needs: semver
+    defaults:
+      run:
+        shell: bash
+        working-directory: .
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    - name: Authenticate to GCP
+      uses: google-github-actions/auth@v2
+      with:
+        credentials_json: ${{ secrets.GCP_JSON }}
+    - name: Get latest tag
+      run: |
+        TAG=$(git describe --tags --abbrev=0)
+        echo "Latest tag: $TAG"
+        echo "latest_tag=$TAG" >> $GITHUB_ENV
+    - name: Set up Google Cloud CLI
+      uses: google-github-actions/setup-gcloud@v2
+    - name: Configure Docker
+      run: gcloud auth configure-docker asia-docker.pkg.dev --quiet
+    - name: Build Docker Image
+      run: |
+        docker build -t asia-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/petclinic/petclinic:${{ vars.APP_TAG }} .
+        docker tag asia-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/petclinic/petclinic:${{ vars.APP_TAG }} asia-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/petclinic/petclinic:latest
+    - name: Push Image to Google Artifact Registry
+      run: |
+        docker push asia-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/petclinic/petclinic:${{ vars.APP_TAG }}
+        docker push asia-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/petclinic/petclinic:latest
 
   deploy:
     defaults:
@@ -41,7 +55,7 @@ jobs:
         shell: bash
         working-directory: .
     runs-on: ubuntu-latest
-    # needs: build
+    needs: build
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
