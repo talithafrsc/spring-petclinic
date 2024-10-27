@@ -31,22 +31,17 @@ jobs:
       uses: google-github-actions/auth@v2
       with:
         credentials_json: ${{ secrets.GCP_JSON }}
-    - name: Get latest tag
-      run: |
-        TAG=$(git describe --tags --abbrev=0)
-        echo "Latest tag: $TAG"
-        echo "latest_tag=$TAG" >> $GITHUB_ENV 
     - name: Set up Google Cloud CLI
       uses: google-github-actions/setup-gcloud@v2
     - name: Configure Docker
       run: gcloud auth configure-docker asia-docker.pkg.dev --quiet
     - name: Build Docker Image
       run: |
-        docker build -t asia-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/petclinic/petclinic:${{ vars.APP_TAG }} .
-        docker tag asia-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/petclinic/petclinic:${{ vars.APP_TAG }} asia-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/petclinic/petclinic:latest
+        docker build -t asia-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/petclinic/petclinic:${{ needs.release.outputs.new_release_version }} .
+        docker tag asia-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/petclinic/petclinic:${{ needs.release.outputs.new_release_version }} asia-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/petclinic/petclinic:latest
     - name: Push Image to Google Artifact Registry
       run: |
-        docker push asia-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/petclinic/petclinic:${{ vars.APP_TAG }}
+        docker push asia-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/petclinic/petclinic:${{ needs.release.outputs.new_release_version }}
         docker push asia-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/petclinic/petclinic:latest
 
   deploy:
@@ -65,7 +60,7 @@ jobs:
         POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
         POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
         POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
-        APP_TAG: ${{ vars.APP_TAG }}
+        APP_TAG: ${{ needs.release.outputs.new_release_version }}
       run: |
         sed -i "s|%POSTGRES_URL%|$POSTGRES_URL|g" docker-compose.yml
         sed -i "s|%POSTGRES_USER%|$POSTGRES_USER|g" docker-compose.yml
