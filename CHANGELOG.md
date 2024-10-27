@@ -1,3 +1,10 @@
+## [1.0.9](https://github.com/talithafrsc/spring-petclinic/compare/v1.0.8...v1.0.9) (2024-10-27)
+
+
+### Bug Fixes
+
+* grant privilege when running script ([a096615](https://github.com/talithafrsc/spring-petclinic/commit/a0966153e20fc02a4a22d3631bfbb326995f2dd2))
+
 ## [1.0.8](https://github.com/talithafrsc/spring-petclinic/compare/v1.0.7...v1.0.8) (2024-10-27)
 
 
