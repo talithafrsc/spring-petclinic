@@ -3,9 +3,15 @@ on:
   push:
     branches:
       - dev
-      - master
     paths:
       - 'terraform/**'
+      - .github/workflows/terraform-ci.yml
+  pull_request:
+    types: 
+      - closed
+    paths:
+      - 'terraform/**'
+      - .github/workflows/terraform-ci.yml
 
 jobs:
   terraform-test:
@@ -34,7 +40,7 @@ jobs:
           
   terraform-deploy:
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/master'
+    if: github.event.pull_request.base.ref == 'master' && github.event.pull_request.merged == true
     defaults:
       run:
         shell: bash
