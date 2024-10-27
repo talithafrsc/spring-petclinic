@@ -1,3 +1,10 @@
+## [1.0.4](https://github.com/talithafrsc/spring-petclinic/compare/v1.0.3...v1.0.4) (2024-10-27)
+
+
+### Bug Fixes
+
+* variable passing ([8e12242](https://github.com/talithafrsc/spring-petclinic/commit/8e12242ebac055fd723c2d5326b94949824625ab))
+
 ## [1.0.3](https://github.com/talithafrsc/spring-petclinic/compare/v1.0.2...v1.0.3) (2024-10-27)
 
 
