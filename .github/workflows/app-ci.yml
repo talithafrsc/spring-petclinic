@@ -28,6 +28,8 @@ jobs:
       run:
         shell: bash
         working-directory: .
+    outputs:
+      NEW_TAG: ${{ needs.semver.outputs.NEW_TAG }}
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -64,7 +66,7 @@ jobs:
         POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
         POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
         POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
-        APP_TAG: ${{ needs.semver.outputs.NEW_TAG }}
+        APP_TAG: ${{ needs.build.outputs.NEW_TAG }}
       run: |
         sed -i "s|%POSTGRES_URL%|$POSTGRES_URL|g" docker-compose.yml
         sed -i "s|%POSTGRES_USER%|$POSTGRES_USER|g" docker-compose.yml
