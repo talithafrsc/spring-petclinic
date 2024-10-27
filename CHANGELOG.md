@@ -1,3 +1,10 @@
+## [1.0.8](https://github.com/talithafrsc/spring-petclinic/compare/v1.0.7...v1.0.8) (2024-10-27)
+
+
+### Bug Fixes
+
+* variable typo ([a01eef3](https://github.com/talithafrsc/spring-petclinic/commit/a01eef30e357c073538b03e9c58104fb197a0504))
+
 ## [1.0.7](https://github.com/talithafrsc/spring-petclinic/compare/v1.0.6...v1.0.7) (2024-10-27)
 
 
