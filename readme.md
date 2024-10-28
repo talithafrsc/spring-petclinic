@@ -1,162 +1,103 @@
-# Spring PetClinic Sample Application [![Build Status](https://github.com/spring-projects/spring-petclinic/actions/workflows/maven-build.yml/badge.svg)](https://github.com/spring-projects/spring-petclinic/actions/workflows/maven-build.yml)
+# Spring PetClinic
 
-[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/spring-projects/spring-petclinic) [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://github.com/codespaces/new?hide_repo_select=true&ref=main&repo=7517918)
+## Design Architecture
+![Design Architecture](https://github.com/talithafrsc/spring-petclinic/raw/main/pics/diagram.png)
 
-## Understanding the Spring Petclinic application with a few diagrams
+**Containerization**
 
-[See the presentation here](https://speakerdeck.com/michaelisvy/spring-petclinic-sample-application)
+The PetClinic application is hosted on a Docker container inside Compute Engine in GCP. An NGINX container acted as reverse proxy in front of the application. By using the blue-green deployment strategy, NGINX helps to minimize downtime during switching from old container to new container. 
 
-## Run Petclinic locally
+PetClinic application & NGINX are located in the same Docker network. Petclinic is assigned to custom network alias, for example `petclinic-app`, so we do not need to modify NGINX configuration during deployment. 
 
-Spring Petclinic is a [Spring Boot](https://spring.io/guides/gs/spring-boot) application built using [Maven](https://spring.io/guides/gs/maven/) or [Gradle](https://spring.io/guides/gs/gradle/). You can build a jar file and run it from the command line (it should work just as well with Java 17 or newer):
+**Database**
 
-```bash
-git clone https://github.com/spring-projects/spring-petclinic.git
-cd spring-petclinic
-./mvnw package
-java -jar target/*.jar
+A PostgreSQL database hosted in CloudSQL stores the data of PetClinic application. Both of the database & container connected by internal network (VPC). The container accesses the database using private DNS, making it easy to access without changing private IPs.
+
+**User Access**
+
+User can access the application from DNS. Because this is a mock implementation, only internal DNS is provided (http://petclinic.local). Combination of Google Cloud LB & public DNS may be used to expose the web publicly.
+
+**Observability**
+
+The Ops Agent is installed on Compute Engine for sending metrics & logging to Monitoring & Logging Dashboard in GCP. Compute Engine metrics such as CPU & Memory usage can be accessed from Observability menu in GCP console. 
+
+By default, docker container logs is not exported to GCP Logging, so a logging driver for Docker needs to be configured (inside docker-compose.yml). To filter the PetClinic logs, put this query inside GCP logging:
+
+```
+jsonPayload.container.metadata.service="petclinic"
 ```
 
-You can then access the Petclinic at <http://localhost:8080/>.
+## CI/CD rules
 
-<img width="1042" alt="petclinic-screenshot" src="https://cloud.githubusercontent.com/assets/838318/19727082/2aee6d6c-9b8e-11e6-81fe-e889a5ddfded.png">
+### Application Changes
+1. Clone the repository to your local
+2. Create a new branch
+3. Make changes in the code
+4. Commit & push the changes by using semantic-release convention (starting with "fix:" or "feat:")
+5. Create a Pull Request to master branch
+6. Merge pull request. This will trigger a workflow to build & deploy the new container
 
-Or you can run it from Maven directly using the Spring Boot Maven plugin. If you do this, it will pick up changes that you make in the project immediately (changes to Java source files require a compile as well - most people use an IDE for this):
+### Infrastructure Changes (Terraform)
+(Currently does not support zero downtime deployment when the Terraform is forced to replace the existing infrastructures)
+1. Clone the repository to your local
+2. Create a new branch
+3. Make changes inside terraform repository
+4. Commit & push the changes by using semantic-release convention (starting with "fix:" or "feat:")
+5. Create a Pull Request to master branch. A workflow will be triggered to dry run your changes in Terraform.
+6. Merge pull request. This will trigger workflow to deploy infrastructure changes in GCP
 
-```bash
-./mvnw spring-boot:run
-```
+## Provisioning Process
 
-> NOTE: If you prefer to use Gradle, you can build the app using `./gradlew build` and look for the jar file in `build/libs`.
+### GCP Preparation
+1. Create a new project of GCP & activate its billing
+2. Create service account & GCP bucket for Terraform & Github workflow
+3. Assign permission for service account
+5. Generate a new service account key (json)
+4. Activate some of required APIs for Terraform & gcloud access in Github Workflow
 
-## Building a Container
+### Github Repository Preparation
+1. Fork [Spring PetClinic](https://github.com/spring-projects/spring-petclinic) repository to own Github account
+2. Generate SSH key for SSH to compute engine during deployment. Put both private & public keys in repository secret
+3. Generate new Github token for semantic release. Put in repository secret
+4. Put other variables & secrets in repository such as GCP service account key, project, machine name & required PostgreSQL variables
 
-There is no `Dockerfile` in this project. You can build a container image (if you have a docker daemon) using the Spring Boot build plugin:
+### Infrastructure provisioning (Terraform)
+1. Prepare Terraform configurations
+    - **backend.tf**: connect to previously created bucket in GCP as terraform backend
+    - **main.tf**: Infrastructure resource & datasource configuration
+    - **variables.tf**: Declare variables for Terraform
+    - **variables.tfvars**: Variables value for Terraform
+    - **.github\workflow\terraform-ci.yml**: Github workflow file for Terraform
+2. Terraform configuration includes managed infrastructure in GCP, which are:
+    - Compute engine
+      - No Public IP configured
+      - Provision Docker & local DNS by startup-script
+    - CloudSQL
+      - No Public IP configured
+    - Artifact registry repository
+    - NAT
+      - Provide public IP of compute engine to connect with public network
+    - Private DNS zone for CloudSQL
+4. Push workflow & configuration files by following CI/CD rules mentioned above, so the workflow will apply the Terraform configuration
 
-```bash
-./mvnw spring-boot:build-image
-```
+### App Deployment
+1. Prepare some file for app deployment
+    - **Dockerfile**: Script to build a Docker image
+    - **docker-compose.yml**: Docker compose configuration, containing PetClinic & NGINX container, network, and log driver
+    - **nginx.conf**: Customized NGINX configuration as reverse proxy of PetClinic app
+    - **deploy.sh**: Script to execute inside the compute engine, to deploy the app
+    - **.github\workflow\app-ci.yml**: Github workflow file for App
+2. Push those files by following CI/CD rules mentioned above
+3. Once PR is merged, semantic release will analyze the commit message & tag the current commit
+4. On build process, the Docker image will be built and pushed to GCP artifact registry using tag generated from semantic release
+5. After build completes, deploy job will started. Github workflow connects to Compute Engine by IAP (mentioning VM name), so no private/public IPs required.
 
-## In case you find a bug/suggested improvement for Spring Petclinic
+(Note for improvement: this process of app deployment does not include unit testing or static code analysis)
 
-Our issue tracker is available [here](https://github.com/spring-projects/spring-petclinic/issues).
-
-## Database configuration
-
-In its default configuration, Petclinic uses an in-memory database (H2) which
-gets populated at startup with data. The h2 console is exposed at `http://localhost:8080/h2-console`,
-and it is possible to inspect the content of the database using the `jdbc:h2:mem:<uuid>` URL. The UUID is printed at startup to the console.
-
-A similar setup is provided for MySQL and PostgreSQL if a persistent database configuration is needed. Note that whenever the database type changes, the app needs to run with a different profile: `spring.profiles.active=mysql` for MySQL or `spring.profiles.active=postgres` for PostgreSQL. See the [Spring Boot documentation](https://docs.spring.io/spring-boot/how-to/properties-and-configuration.html#howto.properties-and-configuration.set-active-spring-profiles) for more detail on how to set the active profile.
-
-You can start MySQL or PostgreSQL locally with whatever installer works for your OS or use docker:
-
-```bash
-docker run -e MYSQL_USER=petclinic -e MYSQL_PASSWORD=petclinic -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=petclinic -p 3306:3306 mysql:9.0
-```
-
-or
-
-```bash
-docker run -e POSTGRES_USER=petclinic -e POSTGRES_PASSWORD=petclinic -e POSTGRES_DB=petclinic -p 5432:5432 postgres:17.0
-```
-
-Further documentation is provided for [MySQL](https://github.com/spring-projects/spring-petclinic/blob/main/src/main/resources/db/mysql/petclinic_db_setup_mysql.txt)
-and [PostgreSQL](https://github.com/spring-projects/spring-petclinic/blob/main/src/main/resources/db/postgres/petclinic_db_setup_postgres.txt).
-
-Instead of vanilla `docker` you can also use the provided `docker-compose.yml` file to start the database containers. Each one has a profile just like the Spring profile:
-
-```bash
-docker-compose --profile mysql up
-```
-
-or
-
-```bash
-docker-compose --profile postgres up
-```
-
-## Test Applications
-
-At development time we recommend you use the test applications set up as `main()` methods in `PetClinicIntegrationTests` (using the default H2 database and also adding Spring Boot Devtools), `MySqlTestApplication` and `PostgresIntegrationTests`. These are set up so that you can run the apps in your IDE to get fast feedback and also run the same classes as integration tests against the respective database. The MySql integration tests use Testcontainers to start the database in a Docker container, and the Postgres tests use Docker Compose to do the same thing.
-
-## Compiling the CSS
-
-There is a `petclinic.css` in `src/main/resources/static/resources/css`. It was generated from the `petclinic.scss` source, combined with the [Bootstrap](https://getbootstrap.com/) library. If you make changes to the `scss`, or upgrade Bootstrap, you will need to re-compile the CSS resources using the Maven profile "css", i.e. `./mvnw package -P css`. There is no build profile for Gradle to compile the CSS.
-
-## Working with Petclinic in your IDE
-
-### Prerequisites
-
-The following items should be installed in your system:
-
-- Java 17 or newer (full JDK, not a JRE)
-- [Git command line tool](https://help.github.com/articles/set-up-git)
-- Your preferred IDE
-  - Eclipse with the m2e plugin. Note: when m2e is available, there is an m2 icon in `Help -> About` dialog. If m2e is
-  not there, follow the install process [here](https://www.eclipse.org/m2e/)
-  - [Spring Tools Suite](https://spring.io/tools) (STS)
-  - [IntelliJ IDEA](https://www.jetbrains.com/idea/)
-  - [VS Code](https://code.visualstudio.com)
-
-### Steps
-
-1. On the command line run:
-
-    ```bash
-    git clone https://github.com/spring-projects/spring-petclinic.git
-    ```
-
-1. Inside Eclipse or STS:
-
-    Open the project via `File -> Import -> Maven -> Existing Maven project`, then select the root directory of the cloned repo.
-
-    Then either build on the command line `./mvnw generate-resources` or use the Eclipse launcher (right-click on project and `Run As -> Maven install`) to generate the CSS. Run the application's main method by right-clicking on it and choosing `Run As -> Java Application`.
-
-1. Inside IntelliJ IDEA:
-
-    In the main menu, choose `File -> Open` and select the Petclinic [pom.xml](pom.xml). Click on the `Open` button.
-
-    - CSS files are generated from the Maven build. You can build them on the command line `./mvnw generate-resources` or right-click on the `spring-petclinic` project then `Maven -> Generates sources and Update Folders`.
-
-    - A run configuration named `PetClinicApplication` should have been created for you if you're using a recent Ultimate version. Otherwise, run the application by right-clicking on the `PetClinicApplication` main class and choosing `Run 'PetClinicApplication'`.
-
-1. Navigate to the Petclinic
-
-    Visit [http://localhost:8080](http://localhost:8080) in your browser.
-
-## Looking for something in particular?
-
-|Spring Boot Configuration | Class or Java property files  |
-|--------------------------|---|
-|The Main Class | [PetClinicApplication](https://github.com/spring-projects/spring-petclinic/blob/main/src/main/java/org/springframework/samples/petclinic/PetClinicApplication.java) |
-|Properties Files | [application.properties](https://github.com/spring-projects/spring-petclinic/blob/main/src/main/resources) |
-|Caching | [CacheConfiguration](https://github.com/spring-projects/spring-petclinic/blob/main/src/main/java/org/springframework/samples/petclinic/system/CacheConfiguration.java) |
-
-## Interesting Spring Petclinic branches and forks
-
-The Spring Petclinic "main" branch in the [spring-projects](https://github.com/spring-projects/spring-petclinic)
-GitHub org is the "canonical" implementation based on Spring Boot and Thymeleaf. There are
-[quite a few forks](https://spring-petclinic.github.io/docs/forks.html) in the GitHub org
-[spring-petclinic](https://github.com/spring-petclinic). If you are interested in using a different technology stack to implement the Pet Clinic, please join the community there.
-
-## Interaction with other open-source projects
-
-One of the best parts about working on the Spring Petclinic application is that we have the opportunity to work in direct contact with many Open Source projects. We found bugs/suggested improvements on various topics such as Spring, Spring Data, Bean Validation and even Eclipse! In many cases, they've been fixed/implemented in just a few days.
-Here is a list of them:
-
-| Name | Issue |
-|------|-------|
-| Spring JDBC: simplify usage of NamedParameterJdbcTemplate | [SPR-10256](https://jira.springsource.org/browse/SPR-10256) and [SPR-10257](https://jira.springsource.org/browse/SPR-10257) |
-| Bean Validation / Hibernate Validator: simplify Maven dependencies and backward compatibility |[HV-790](https://hibernate.atlassian.net/browse/HV-790) and [HV-792](https://hibernate.atlassian.net/browse/HV-792) |
-| Spring Data: provide more flexibility when working with JPQL queries | [DATAJPA-292](https://jira.springsource.org/browse/DATAJPA-292) |
-
-## Contributing
-
-The [issue tracker](https://github.com/spring-projects/spring-petclinic/issues) is the preferred channel for bug reports, feature requests and submitting pull requests.
-
-For pull requests, editor preferences are available in the [editor config](.editorconfig) for easy use in common text editors. Read more and download plugins at <https://editorconfig.org>. If you have not previously done so, please fill out and submit the [Contributor License Agreement](https://cla.pivotal.io/sign/spring).
-
-## License
-
-The Spring PetClinic sample application is released under version 2.0 of the [Apache License](https://www.apache.org/licenses/LICENSE-2.0).
+### Blue-Green Deployment Process
+1. Authenticate to docker registry
+2. Check the current running container. If container is running, get the current container name
+3. Deploy the new container by scaling the app to 2 without destroying the old container
+4. Wait until the new container is ready
+5. Stop the old container & reload NGINX configuration
+6. Reconfigure docker compose by scaling down the app to 1
