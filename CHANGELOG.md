@@ -1,3 +1,10 @@
+## [1.0.14](https://github.com/talithafrsc/spring-petclinic/compare/v1.0.13...v1.0.14) (2024-10-28)
+
+
+### Bug Fixes
+
+* trigger deployment after terraform ([425791f](https://github.com/talithafrsc/spring-petclinic/commit/425791f0d80d4559b6eccc18888a6f4f25aa7a90))
+
 ## [1.0.13](https://github.com/talithafrsc/spring-petclinic/compare/v1.0.12...v1.0.13) (2024-10-28)
 
 
