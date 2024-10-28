@@ -1,3 +1,10 @@
+## [1.0.16](https://github.com/talithafrsc/spring-petclinic/compare/v1.0.15...v1.0.16) (2024-10-28)
+
+
+### Bug Fixes
+
+* workflow configuration ([69858f9](https://github.com/talithafrsc/spring-petclinic/commit/69858f93d48fea0f39ca744c5677e693b53ae82a))
+
 ## [1.0.15](https://github.com/talithafrsc/spring-petclinic/compare/v1.0.14...v1.0.15) (2024-10-28)
 
 
