@@ -1,3 +1,11 @@
+## [1.0.13](https://github.com/talithafrsc/spring-petclinic/compare/v1.0.12...v1.0.13) (2024-10-28)
+
+
+### Bug Fixes
+
+* Change VM size ([282ef53](https://github.com/talithafrsc/spring-petclinic/commit/282ef538ccabecfc60402659306e17db5ef177c8))
+* insert runner to docker group ([5c62e92](https://github.com/talithafrsc/spring-petclinic/commit/5c62e92a172a4341fd56a1fc1ee088fe1b81e231))
+
 ## [1.0.12](https://github.com/talithafrsc/spring-petclinic/compare/v1.0.11...v1.0.12) (2024-10-27)
 
 
