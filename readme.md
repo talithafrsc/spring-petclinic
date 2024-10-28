@@ -1,7 +1,7 @@
 # Spring PetClinic
 
 ## Design Architecture
-![Design Architecture](https://github.com/talithafrsc/spring-petclinic/raw/main/pics/diagram.png)
+![Design Architecture](https://github.com/talithafrsc/spring-petclinic/blob/master/pics/diagram.png)
 
 **Containerization**
 
