@@ -4,10 +4,11 @@ on:
   push:
     branches:
       - master
-    paths-ignore:
-      - 'terraform/**'
-      - .github/workflows/terraform-ci.yml
-      
+  workflow_run:
+    workflows: ["Terraform-CI "]
+    types:
+      - completed
+  
 jobs:
   semver:
     runs-on: ubuntu-latest
