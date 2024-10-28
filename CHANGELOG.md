@@ -1,3 +1,10 @@
+## [1.0.15](https://github.com/talithafrsc/spring-petclinic/compare/v1.0.14...v1.0.15) (2024-10-28)
+
+
+### Bug Fixes
+
+* docker installastion script ([100113e](https://github.com/talithafrsc/spring-petclinic/commit/100113e0a4ce3771833918eadcc35d45c651d51c))
+
 ## [1.0.14](https://github.com/talithafrsc/spring-petclinic/compare/v1.0.13...v1.0.14) (2024-10-28)
 
 
