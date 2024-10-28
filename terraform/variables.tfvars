@@ -4,7 +4,7 @@ zone = "asia-southeast2-a"
 app = "petclinic"
 
 vm_name = "petclinic"
-vm_type = "e2-medium"
+vm_type = "e2-custom-4-2048"
 vm_image = "debian-cloud/debian-11"
 
 db_name = "petclinic"
