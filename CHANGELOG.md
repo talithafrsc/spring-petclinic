@@ -1,3 +1,10 @@
+## [1.0.17](https://github.com/talithafrsc/spring-petclinic/compare/v1.0.16...v1.0.17) (2024-10-30)
+
+
+### Bug Fixes
+
+* deploy find owners V2 ([74cd9f7](https://github.com/talithafrsc/spring-petclinic/commit/74cd9f7c393c432496b1bfb0d7683c5366bcb8ed))
+
 ## [1.0.16](https://github.com/talithafrsc/spring-petclinic/compare/v1.0.15...v1.0.16) (2024-10-28)
 
 
